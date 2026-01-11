@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preparación DataSet</title>
+    <link rel="stylesheet" href="css/styles.css"> 
+    <style>
+         /* Botón de regreso */
+        .back-btn {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 10px 20px;
+            background-color: #e093c7;
+            color: #fff;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background-color: #73906e;
+        }
+    </style>
+</head>
+<body>
+    <body>
+    <h1>Preparación del Dataset</h1>
+    <p id="status">Cargando...</p>
+
+    <div id="splitInfo" class="table-container"></div>
+    <div id="imputerInfo" class="table-container"></div>
+    <div id="oneHotInfo"></div>
+    <div id="scaledInfo"></div>
+    <div id="previewTable" class="table-container"></div>
+
+    <!-- Botón de regreso -->
+    <a href="index.html" class="back-btn">← Regresa al Menú</a>
+
+    <script src="js/config.js"></script>
+    <script src="js/prepare_dataset.js"></script>
+</body>
+</html>

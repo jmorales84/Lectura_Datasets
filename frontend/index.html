@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>REGRESIÓN LOGÍSTICA</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;600&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/styles.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+  </head>
+  <body>
+    <section class="hero">
+      <div class="hero-bg"></div>
+      <h1 class="glass">Ejecuta Análisis Logísticos sobre tus Datos</h1>
+    </section>
+
+    <section class="upload glass">
+      <label class="upload-box">
+        <input type="file" id="DataSetInput" accept=".csv, .txt, .json" />
+        <i class="fa-solid fa-leaf"></i> 
+        <span>Selecciona tu Dataset</span>
+        <small>Formatos soportados: ARFF</small>
+      </label>
+      <p class="upload-status" id="uploadStatus"></p>
+
+      <div id="datasetIndicator" class="dataset-indicator hidden">
+        <i class="fa-solid fa-seedling"></i>
+        <span>El dataset está listo para el análisis</span>
+      </div>
+
+      <button id="resetDataset" class="reset-btn hidden">
+        <i class="fa-solid fa-rotate-left"></i> Cambiar Archivo
+      </button>
+    </section>
+
+    <section class="menu">
+      <a href="visualizacion.html" class="menu-btn" data-require-dataset="true">
+        <span>Visualización </span>
+        <i class="fa-solid fa-wand-magic-sparkles"></i>
+      </a>
+
+      <a href="division_data.html" class="menu-btn">
+        <span>División de Datos</span>
+        <i class="fa-solid fa-arrows-split-up-and-left"></i>
+      </a>
+
+      <a href="prep_Data.html" class="menu-btn">
+        <span>Preparación (Limpieza)</span>
+        <i class="fa-solid fa-broom-ball"></i>
+      </a>
+
+      <a href="pipelinesPersonalizados.html" class="menu-btn">
+        <span>Pipelines de Datos</span>
+        <i class="fa-solid fa-route"></i>
+      </a>
+
+      <a href="eval_model.html" class="menu-btn">
+        <span>Evaluación de Resultados</span>
+        <i class="fa-solid fa-square-poll-vertical"></i>
+      </a>
+    </section>
+
+    <footer class="footer">
+      <p>© 2025-2026 — <strong>JVM</strong> · Con estilo</p>
+    </footer>
+
+    <script src="js/config.js"></script>
+    <script src="js/cargar_archivo.js" defer></script>
+  </body>
+</html>

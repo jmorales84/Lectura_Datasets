@@ -1,0 +1,132 @@
+
+body {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    color: #354f52; /* Verde muy oscuro para legibilidad */
+    font-family: 'Montserrat', system-ui, sans-serif;
+    margin: 0;
+    padding: 2rem;
+}
+
+h1, h2 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    font-family: 'Playfair Display', serif;
+    color: #2f3e46;
+}
+
+.container {
+    max-width: 1000px;
+    margin: auto;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    padding: 2rem;
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(53, 79, 82, 0.1);
+}
+
+/* TABLAS ESTILO SOFT GARDEN */
+.table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-bottom: 2rem;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #cad2c5;
+}
+
+.table th {
+    background: #52796f; /* Verde Salvia */
+    color: white;
+    padding: 14px;
+    font-weight: 500;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+}
+
+.table td {
+    padding: 12px;
+    text-align: center;
+    border-bottom: 1px solid #cad2c5;
+    background: white;
+}
+
+.table tr:last-child td {
+    border-bottom: none;
+}
+
+/* INTERPRETACIÓN DE RESULTADOS */
+.ok {
+    background-color: rgba(82, 121, 111, 0.15) !important; /* Verde traslúcido */
+    color: #2f3e46;
+    font-weight: bold;
+}
+
+.warn {
+    background-color: rgba(234, 134, 133, 0.15) !important; /* Rosa suave traslúcido */
+    color: #c44569;
+}
+
+.bad {
+    background-color: rgba(196, 69, 105, 0.15) !important; /* Rosa fuerte traslúcido */
+    color: #c44569;
+    font-weight: bold;
+}
+
+/* MATRIZ DE CONFUSIÓN Y GRÁFICOS */
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 2rem auto;
+    border-radius: 15px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+    border: 3px solid white;
+    transition: transform 0.3s ease;
+}
+
+img:hover {
+    transform: scale(1.02);
+}
+
+/* BOTÓN DE ACCIÓN */
+.actions {
+    display: flex;
+    justify-content: center;
+    margin-top: 2rem;
+}
+
+.btn-back {
+    background: #c44569; /* Rosa Baya */
+    border: none;
+    color: white;
+    padding: 12px 35px;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 15px rgba(196, 69, 105, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-back:hover {
+    background: #52796f; /* Cambia a Verde al pasar el mouse */
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(82, 121, 111, 0.4);
+}
+
+/* Scrollbar personalizada para que combine */
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+::-webkit-scrollbar-thumb {
+    background: #84a59d;
+    border-radius: 10px;
+}

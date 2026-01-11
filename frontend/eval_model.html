@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Evaluación del Modelo</title>
+    <link rel="stylesheet" href="css/evaluacion.css" />
+  </head>
+  <body>
+    <h1>Evaluación del Modelo</h1>
+
+    <div class="container">
+      <section>
+        <h2>Métricas Principales</h2>
+        <table class="table centered">
+          <thead>
+            <tr>
+              <th>Tipo</th>
+              <th>Accuracy</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Validación</td>
+              <td id="acc-val">-</td>
+            </tr>
+            <tr>
+              <td>Test</td>
+              <td id="acc-test">-</td>
+            </tr>
+            <tr>
+              <td><strong>Diferencia</strong></td>
+              <td id="acc-diff">-</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- TABLA DE INTERPRETACIÓN -->
+      <section>
+        <h2>Interpretación del Modelo</h2>
+        <table class="table centered" id="interpretation-table">
+          <thead>
+            <tr>
+              <th>Diferencia</th>
+              <th>Interpretación</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </section>
+
+      <!-- MATRIZ DE CONFUSIÓN -->
+      <section>
+        <h2>Matriz de Confusión</h2>
+        <table class="table centered">
+          <tbody>
+            <tr>
+              <td>
+                <img id="confusion-img" alt="Matriz de confusión" />
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- BOTÓN REGRESAR -->
+      <div class="actions">
+        <button class="btn-back" onclick="window.location.href='index.html'">
+          ⬅ Regresar al inicio
+        </button>
+      </div>
+    </div>
+    <script src="js/config.js"></script>
+    <script src="js/evaluacion.js"></script>
+  </body>
+</html>

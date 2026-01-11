@@ -1,0 +1,225 @@
+/* VARIABLES GLOBALES */
+:root {
+    /* Fondo y Base */
+    --bg-color: #f4f7f6;        
+    --light-green: #cad2c5;     
+    
+    /* Paleta Verde (de la imagen de la izquierda) */
+    --forest-green: #354f52;    
+    --sage-muted: #52796f;      
+    
+    /* Paleta Rosa (de la imagen de la derecha) */
+    --deep-magenta: #880d3e;    
+    --berry-pink: #c44569;      
+    --soft-rose: #ea8685;       
+    
+    /* Estructura */
+    --text-color: #2f3e46;      
+    --glass-bg: rgba(255, 255, 255, 0.8);
+    --glass-border: rgba(53, 79, 82, 0.2);
+
+    --title-size: clamp(18px, 4.5vw + 1rem, 56px);
+    /* Degradado */
+    --border-gradient: linear-gradient(135deg, var(--forest-green), var(--berry-pink));
+}
+
+/* HTML Y CUERPO */
+html, body {
+    height: 100%;
+    margin: 0;
+    font-family: 'Montserrat', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: center; 
+    min-height: 100vh;
+}
+
+/* HERO  TITULO PRINCIPAL */
+h1 {
+    font-size: var(--title-size);
+    font-family: 'Playfair Display', serif;
+    text-align: center;
+    width: 100%;
+    max-width: 900px;
+    padding: clamp(1.5rem, 4vw, 3rem) 1rem;
+    margin: 0 auto;
+
+    /* Gradiente */
+    background: linear-gradient(135deg, var(--forest-green), var(--deep-magenta));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent; 
+}
+
+/* RECUADRO DEL CARGA DATASET  */
+.upload {
+    width: 100%;
+    max-width: 700px;
+    margin: 1rem auto;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center; 
+}
+
+.upload-box {
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.8rem;
+    padding: 2.5rem;
+    border-radius: 20px;
+    cursor: pointer;
+
+    background: white;
+    border: 2px dashed var(--light-green);
+    transition: all 0.3s ease;
+}
+
+.upload-box:hover {
+    background: #fdf2f8; 
+    border-color: var(--berry-pink);
+    transform: translateY(-3px);
+}
+
+.upload-box i {
+    font-size: 2.5rem;
+    color: var(--berry-pink);
+}
+
+/* BOTONES */
+.menu {
+    flex: 1 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    justify-items: center; 
+    align-content: start;
+    gap: 2rem;
+    padding: 2rem;
+    width: 90%;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.menu-btn {
+    width: 100%;
+    max-width: 280px;
+    text-decoration: none;
+    color: var(--text-color);
+    background: white;
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 2rem 1rem;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center; 
+    justify-content: center;
+    text-align: center;
+    transition: all 0.3s ease;
+    position: relative;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+}
+
+/* Borde */
+.menu-btn::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+    padding: 2px;
+    background: var(--border-gradient);
+    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+.menu-btn i {
+    font-size: 2.2rem;
+    margin-bottom: 1rem;
+    color: var(--sage-muted);
+}
+
+.menu-btn span {
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.85rem;
+}
+
+.menu-btn:hover {
+    transform: translateY(-5px);
+    background: #f9fafb;
+    box-shadow: 0 10px 20px rgba(136, 13, 62, 0.1);
+}
+
+/* TABLAS ALINEADAS */
+.table-container {
+    width: 90%;
+    max-width: 1000px;
+    margin: 2rem auto;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+table.table th {
+    background-color: var(--forest-green);
+    color: #ffffff;
+    padding: 15px;
+}
+
+table.table td {
+    padding: 12px;
+    border-bottom: 1px solid var(--light-green);
+}
+
+/* FOOTER */
+.footer {
+    width: 100%;
+    padding: 2rem;
+    text-align: center;
+    background: var(--forest-green);
+    color: var(--light-green);
+    margin-top: auto;
+}
+
+/* BOTONES DE ACCIÓN */
+.actions {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    padding: 2rem;
+}
+
+.btn-back {
+    background: white;
+    border: 2px solid var(--deep-magenta);
+    color: var(--deep-magenta);
+    padding: 12px 35px;
+    font-weight: 600;
+    border-radius: 50px; 
+    transition: all 0.3s ease;
+}
+
+.btn-back:hover {
+    background: var(--deep-magenta);
+    color: white;
+    box-shadow: 0 5px 15px rgba(136, 13, 62, 0.3);
+}
+
+/* Indicador */
+.dataset-indicator {
+    color: var(--sage-muted);
+    font-weight: bold;
+}
