@@ -1,5 +1,22 @@
-.
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.env
 .envDev
-__pycache__
-media
-backend/backend/__pycache__
+
+# Entorno Virtual 
+venv/
+env/
+
+# Django
+db.sqlite3
+media/
+staticfiles/
+
+# Mac
+.DS_Store
+
+# IDEs
+.vscode/
+.idea/
