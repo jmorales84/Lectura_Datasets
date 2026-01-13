@@ -1,10 +1,16 @@
 window.addEventListener("DOMContentLoaded", () => {
+
+    // ================================
     // ELEMENTOS DEL DOM
+    // ================================
     const input = document.getElementById("DataSetInput");
     const status = document.getElementById("uploadStatus");
     const indicator = document.getElementById("datasetIndicator");
     const resetBtn = document.getElementById("resetDataset");
+
+    // ================================
     // ACTUALIZAR UI
+    // ================================
     function actualizarEstadoUI() {
         const datasetId = sessionStorage.getItem("dataset_id");
         console.log("Dataset en sessionStorage:", datasetId);
@@ -29,7 +35,9 @@ window.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    // ================================
     // SUBIR DATASET
+    // ================================
     input?.addEventListener("change", async () => {
         const file = input.files[0];
         if (!file) return;
@@ -64,13 +72,18 @@ window.addEventListener("DOMContentLoaded", () => {
         input.value = "";
     });
 
+    // ================================
     // RESET DATASET
+    // ================================
     resetBtn?.addEventListener("click", () => {
         sessionStorage.removeItem("dataset_id");
         status.textContent = "Dataset eliminado. Puedes subir otro.";
         actualizarEstadoUI();
     });
+
+    // ================================
     // PROTECCIÓN DE BOTONES
+    // ================================
     document.querySelectorAll('[data-requiere-dataset]').forEach(btn => {
         btn.addEventListener("click", e => {
             const datasetId = sessionStorage.getItem("dataset_id");
@@ -82,6 +95,8 @@ window.addEventListener("DOMContentLoaded", () => {
         });
     });
 
+    // ================================
     // ESTADO INICIAL
+    // ================================
     actualizarEstadoUI();
 });

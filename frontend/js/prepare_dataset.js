@@ -1,131 +1,86 @@
-/**
- * Lógica para la etapa de Preparación y Transformación del Dataset
- */
 document.addEventListener("DOMContentLoaded", async () => {
     const status = document.getElementById("status");
     const datasetId = sessionStorage.getItem("dataset_id");
 
-    // Verificación inicial de seguridad
-    if (!datasetId || datasetId === "null") {
-        status.innerHTML = '<b class="text-danger">⚠️ No se encontró un Dataset activo. Regresa a "Subir Archivo".</b>';
+    if (!datasetId) {
+        status.textContent = "No hay dataset cargado. Regresa al menú.";
         return;
     }
 
     try {
-        status.textContent = "⏳ Procesando transformaciones en el servidor...";
-
         const response = await fetch(`${API_BASE_URL}/apis/prepare_dataset/`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ dataset_id: datasetId })
         });
 
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || "Error interno en el servidor");
-        }
+        if (!response.ok) throw new Error("Error procesando dataset");
 
         const data = await response.json();
-        status.innerHTML = '<span class="text-success">✅ Preparación completada con éxito</span>';
+        status.textContent = "Preparación completada ✔";
 
-        // 1. Mostrar información de los Splits
-        renderSplitCards(data.split_sizes);
+        // --- Split info ---
+        const splitDiv = document.getElementById("splitInfo");
+        splitDiv.innerHTML = `
+            <h3>Tamaños de los splits</h3>
+            <table class="table">
+                <tr><th>Split</th><th>Filas</th></tr>
+                <tr><td>Train</td><td>${data.split_sizes.train}</td></tr>
+                <tr><td>Validation</td><td>${data.split_sizes.validation}</td></tr>
+                <tr><td>Test</td><td>${data.split_sizes.test}</td></tr>
+            </table>
+        `;
 
-        // 2. Mostrar medianas calculadas (SimpleImputer)
-        renderMediansTable(data.imputer_median);
+        // --- Imputer info ---
+        const imputerDiv = document.getElementById("imputerInfo");
+        let imputerRows = "";
+        for (const [col, val] of Object.entries(data.imputer_median)) {
+            imputerRows += `<tr><td>${col}</td><td>${val}</td></tr>`;
+        }
+        imputerDiv.innerHTML = `
+            <h3>Medianas usadas para imputación</h3>
+            <table class="table">
+                <tr><th>Columna</th><th>Mediana</th></tr>
+                ${imputerRows}
+            </table>
+        `;
 
-        // 3. Mostrar columnas transformadas
-        renderTransformationsInfo(data.one_hot_columns, data.scaled_columns);
+        // --- One-hot columns ---
+        const oneHotDiv = document.getElementById("oneHotInfo");
+        oneHotDiv.innerHTML = `
+            <h3>Columnas one-hot encoding</h3>
+            <ul>${data.one_hot_columns.map(c => `<li>${c}</li>`).join("")}</ul>
+        `;
 
-        // 4. Mostrar Vista Previa de X_train transformado
-        renderPreviewTable(data.X_train_preview);
+        // --- Scaled columns ---
+        const scaledDiv = document.getElementById("scaledInfo");
+        scaledDiv.innerHTML = `
+            <h3>Columnas escaladas</h3>
+            <ul>${data.scaled_columns.map(c => `<li>${c}</li>`).join("")}</ul>
+        `;
+
+        // --- Vista previa X_train (tabla interactiva) ---
+        const previewDiv = document.getElementById("previewTable");
+        const previewData = data.X_train_preview;
+        if(previewData.length > 0){
+            const headers = Object.keys(previewData[0]);
+            const headerRow = headers.map(h => `<th>${h}</th>`).join("");
+            const bodyRows = previewData.map((row, idx) => {
+                return "<tr>" + headers.map(h => `<td>${row[h]}</td>`).join("") + "</tr>";
+            }).join("");
+            previewDiv.innerHTML = `
+                <h3>Vista previa X_train (primeras 10 filas)</h3>
+                <table class="table">
+                    <thead><tr>${headerRow}</tr></thead>
+                    <tbody>${bodyRows}</tbody>
+                </table>
+            `;
+        } else {
+            previewDiv.innerHTML = "<p>No hay datos para mostrar</p>";
+        }
 
     } catch (err) {
-        console.error("Error:", err);
-        status.innerHTML = `<b class="text-danger">❌ Error: ${err.message}</b>`;
+        console.error(err);
+        status.textContent = "Error al procesar el dataset";
     }
 });
-
-/** RENDERIZADORES **/
-
-function renderSplitCards(sizes) {
-    const container = document.getElementById("splitInfo");
-    container.innerHTML = `
-        <div class="row text-center mt-3">
-            <div class="col-md-4">
-                <div class="card bg-light p-3 border-success">
-                    <h6>Train (60%)</h6>
-                    <h3 class="text-success">${sizes.train}</h3>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card bg-light p-3 border-warning">
-                    <h6>Validation (20%)</h6>
-                    <h3 class="text-warning">${sizes.validation}</h3>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card bg-light p-3 border-primary">
-                    <h6>Test (20%)</h6>
-                    <h3 class="text-primary">${sizes.test}</h3>
-                </div>
-            </div>
-        </div>`;
-}
-
-function renderMediansTable(medians) {
-    const container = document.getElementById("imputerInfo");
-    const entries = Object.entries(medians);
-    
-    if (entries.length === 0) {
-        container.innerHTML = "<p class='text-muted'>No se aplicó imputación de nulos.</p>";
-        return;
-    }
-
-    let rows = entries.map(([col, val]) => `
-        <tr>
-            <td><code>${col}</code></td>
-            <td class="text-end font-monospace">${val.toFixed(4)}</td>
-        </tr>`).join("");
-
-    container.innerHTML = `
-        <div class="table-responsive mt-3">
-            <table class="table table-sm table-bordered">
-                <thead class="table-secondary"><tr><th>Atributo Numérico</th><th class="text-end">Valor Mediana</th></tr></thead>
-                <tbody>${rows}</tbody>
-            </table>
-        </div>`;
-}
-
-function renderTransformationsInfo(oneHot, scaled) {
-    document.getElementById("oneHotInfo").innerHTML = `
-        <div class="alert alert-info py-2">
-            <small><b>One-Hot Encoding:</b> Se generaron ${oneHot.length} nuevas columnas binarias.</small>
-        </div>`;
-    
-    document.getElementById("scaledInfo").innerHTML = `
-        <div class="alert alert-secondary py-2">
-            <small><b>Robust Scaling:</b> Atributos normalizados: ${scaled.join(", ")}</small>
-        </div>`;
-}
-
-function renderPreviewTable(rows) {
-    const container = document.getElementById("previewTable");
-    if (!rows || rows.length === 0) return;
-
-    const headers = Object.keys(rows[0]);
-    
-    let headerHtml = headers.map(h => `<th>${h}</th>`).join("");
-    let rowsHtml = rows.map(row => `
-        <tr>${headers.map(h => `<td>${row[h] !== null ? row[h] : '<em>NaN</em>'}</td>`).join("")}</tr>
-    `).join("");
-
-    container.innerHTML = `
-        <h5 class="mt-4">Vista Previa de Datos Transformados (X_train)</h5>
-        <div class="table-responsive shadow-sm">
-            <table class="table table-hover table-bordered table-sm custom-table">
-                <thead class="table-dark"><tr>${headerHtml}</tr></thead>
-                <tbody>${rowsHtml}</tbody>
-            </table>
-        </div>`;
-}
