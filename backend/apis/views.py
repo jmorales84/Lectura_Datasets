@@ -508,49 +508,51 @@ def visualizar_dataset(request):
         return JsonResponse({"error": "dataset_id requerido"}, status=400)
 
     datasets_dir = os.path.join(settings.MEDIA_ROOT, "datasets")
+    # Buscamos el archivo que coincida con el ID
     archivo = next((f for f in os.listdir(datasets_dir) if f.startswith(dataset_id)), None)
+    
     if not archivo:
         return JsonResponse({"error": "Dataset no encontrado"}, status=404)
 
     file_path = os.path.join(datasets_dir, archivo)
 
-    # Cargar dataset NSL-KDD
-    df = load_kdd_dataset(file_path)
-    df.columns = [c.strip().lower() for c in df.columns]
+    # Cargar dataset (Usando tu función load_kdd_dataset que definiste arriba)
+    try:
+        df = load_kdd_dataset(file_path)
+        df.columns = [str(c).strip().lower() for c in df.columns]
+    except Exception as e:
+        return JsonResponse({"error": f"Error al cargar: {str(e)}"}, status=500)
 
-    # Previsualización
-    preview = {
-        "columns": list(df.columns),
-        "rows": df.head(options.get("preview_rows", 10)).to_dict(orient="records")
-    }
-
-    # Info
+    # 1. Info general y Previsualización
     info = dataframe_info(df)
+    preview_rows = options.get("preview_rows", 10)
+    
+    # 2. Generar Gráficos de Distribución (Histogramas/Barras en Base64)
+    # Nota: Limitamos a las primeras 12 columnas para no saturar el JSON del front si el dataset es muy grande
+    plots = generate_plots_base64(df.iloc[:, :12]) 
 
-    # Plots
-    plots = generate_plots_base64(df)
-    correlation_plots = generate_scatter_matrix_base64(df, attributes=[
-        "same_srv_rate", "dst_host_srv_count", "class", "dst_host_same_srv_rate"
-    ])
+    # 3. Gráficos de Correlación (Scatter Matrix)
+    # Usamos las columnas específicas que definiste en tu función original
+    correlation_cols = ["same_srv_rate", "dst_host_srv_count", "dst_host_same_srv_rate"]
+    correlation_plots = generate_scatter_matrix_base64(df, attributes=correlation_cols)
 
-    # Matriz de confusión dummy (solo ejemplo)
-    confusion_matrix_plot = generate_confusion_matrix_base64(
-        y_true=df["class"][:50],
-        y_pred=df["class"][:50]
-    )
-
+    # 4. Respuesta final estructurada para el Frontend
     response = {
         "dataset_id": dataset_id,
         "filename": archivo,
-        "rows": int(df.shape[0]),
-        "columns": int(df.shape[1]),
-        "preview": preview,
+        "stats": {
+            "rows": int(df.shape[0]),
+            "columns": int(df.shape[1]),
+        },
+        "preview": {
+            "columns": list(df.columns),
+            "rows": df_to_json_safe(df, max_rows=preview_rows) # Usamos tu función safe para evitar errores de NaN en JSON
+        },
         "info": info,
         "plots": plots,
         "correlation_plots": correlation_plots,
-        "confusion_matrix": confusion_matrix_plot
+        # Eliminamos la matriz de confusión de aquí porque no tiene sentido antes de entrenar
     }
-
     return JsonResponse(response)
 
 # Enpoints para la division del DataSet
@@ -845,7 +847,6 @@ def pipelines_personalizados_comprimido(request):
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
 
-# Evaluacion de resultados del modelo 
 @csrf_exempt
 def evaluar_modelo(request):
     if request.method != "POST":
@@ -860,42 +861,50 @@ def evaluar_modelo(request):
     if not dataset_id:
         return JsonResponse({"error": "dataset_id requerido"}, status=400)
 
-    # Buscar dataset
+    # 1. Localizar el archivo en el sistema
     datasets_dir = os.path.join(settings.MEDIA_ROOT, "datasets")
     archivo = next((f for f in os.listdir(datasets_dir) if f.startswith(dataset_id)), None)
+    
     if not archivo:
         return JsonResponse({"error": "Dataset no encontrado"}, status=404)
 
     data_path = os.path.join(datasets_dir, archivo)
 
-    # Cargar dataset
-    df = load_kdd_dataset(data_path)
+    # 2. Cargar dataset
+    try:
+        df = load_kdd_dataset(data_path)
+    except Exception as e:
+        return JsonResponse({"error": f"Error al leer el archivo: {str(e)}"}, status=422)
+
+    # Normalizar nombres de columnas
     df.columns = [str(c).strip().lower() for c in df.columns]
 
     if "class" not in df.columns:
         return JsonResponse({"error": 'El dataset debe contener la columna "class"'}, status=400)
 
-    # Split
-    train_set, val_set, test_set = train_val_test_split(
-        df,
-        test_size=0.4,
-        val_size=0.2,
-        stratify="class"
-    )
+    # 3. División de datos (Split)
+    try:
+        # Usando la función unificada que definiste previamente
+        train_set, val_set, test_set = train_val_test_split(
+            df,
+            test_size=0.4,
+            val_size=0.2,
+            stratify="class"
+        )
+    except Exception as e:
+        return JsonResponse({"error": f"Error en la división de datos: {str(e)}"}, status=500)
 
-    # X / y
+    # Definir X (características) y y (objetivo)
     X_train = train_set.drop("class", axis=1)
     y_train = train_set["class"]
-
     X_val = val_set.drop("class", axis=1)
     y_val = val_set["class"]
-
     X_test = test_set.drop("class", axis=1)
     y_test = test_set["class"]
 
-    # Pipeline
-    num_attribs = list(X_train.select_dtypes(exclude=["object"]))
-    cat_attribs = list(X_train.select_dtypes(include=["object"]))
+    # 4. Pipeline de Preprocesamiento
+    num_attribs = list(X_train.select_dtypes(exclude=["object"]).columns)
+    cat_attribs = list(X_train.select_dtypes(include=["object"]).columns)
 
     num_pipeline = Pipeline([
         ("imputer", SimpleImputer(strategy="median")),
@@ -904,57 +913,53 @@ def evaluar_modelo(request):
 
     full_pipeline = ColumnTransformer([
         ("num", num_pipeline, num_attribs),
-        ("cat", OneHotEncoder(handle_unknown="ignore"), cat_attribs)
+        ("cat", OneHotEncoder(handle_unknown="ignore", sparse_output=False), cat_attribs)
     ])
 
-    # Fit SOLO con train
-    X_train_prep = full_pipeline.fit_transform(X_train)
-    X_val_prep = full_pipeline.transform(X_val)
-    X_test_prep = full_pipeline.transform(X_test)
+    # 5. Entrenamiento del Modelo
+    try:
+        # Fit y Transformación
+        X_train_prep = full_pipeline.fit_transform(X_train)
+        X_val_prep = full_pipeline.transform(X_val)
+        X_test_prep = full_pipeline.transform(X_test)
 
-    # Modelo
-    clf = LogisticRegression(max_iter=10000, n_jobs=-1)
-    clf.fit(X_train_prep, y_train)
+        clf = LogisticRegression(max_iter=10000)
+        clf.fit(X_train_prep, y_train)
+    except Exception as e:
+        return JsonResponse({"error": f"Error durante el entrenamiento: {str(e)}"}, status=500)
 
-    # Predicciones
+    # 6. Predicciones y Métricas
     y_val_pred = clf.predict(X_val_prep)
     y_test_pred = clf.predict(X_test_prep)
 
-    # Métricas
     acc_val = accuracy_score(y_val, y_val_pred)
     acc_test = accuracy_score(y_test, y_test_pred)
     acc_diff = abs(acc_val - acc_test)
 
+    # Reporte de clasificación
     report_test = classification_report(
         y_test,
         y_test_pred,
         output_dict=True
     )
 
-    conf_matrix = confusion_matrix(y_test, y_test_pred)
-    labels = sorted(y_test.unique())
-
-    conf_matrix_url = save_confusion_matrix_image(
-        conf_matrix,
-        labels,
-        settings.MEDIA_ROOT
-    )
-
-    # Respuesta
+    # 7. Respuesta estructurada para el Front
     response = {
         "dataset_id": dataset_id,
-        "model": "LogisticRegression",
-        "split_sizes": {
-            "train": len(train_set),
-            "validation": len(val_set),
-            "test": len(test_set)
+        "model_info": {
+            "algorithm": "LogisticRegression",
+            "parameters": "max_iter=10000"
         },
-        "metrics": {
-            "accuracy_validation": acc_val,
-            "accuracy_test": acc_test,
-            "accuracy_difference": acc_diff,
-            "classification_report_test": report_test,
-            "confusion_matrix_image": conf_matrix_url
+        "split_sizes": {
+            "train": int(len(train_set)),
+            "validation": int(len(val_set)),
+            "test": int(len(test_set))
+        },
+        "results": {
+            "accuracy_validation": float(acc_val),
+            "accuracy_test": float(acc_test),
+            "accuracy_difference": float(acc_diff),
+            "classification_report": report_test
         }
     }
 
