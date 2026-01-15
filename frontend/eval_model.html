@@ -8,7 +8,19 @@
   <body>
     <h1>Evaluación del Modelo</h1>
 
+    <!-- PROGRESO -->
+    <section class="progress-section">
+      <div class="progress-container">
+        <div id="progress-bar" class="progress-bar"></div>
+      </div>
+      <p id="progress-text" class="progress-text">
+        Esperando inicio de evaluación...
+      </p>
+    </section>
+
     <div class="container">
+
+      <!-- MÉTRICAS PRINCIPALES -->
       <section>
         <h2>Métricas Principales</h2>
         <table class="table centered">
@@ -35,7 +47,38 @@
         </table>
       </section>
 
-      <!-- TABLA DE INTERPRETACIÓN -->
+      <!-- MÉTRICAS AVANZADAS -->
+      <section>
+        <h2>Métricas Avanzadas</h2>
+        <table class="table centered">
+          <thead>
+            <tr>
+              <th>Métrica</th>
+              <th>Valor</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>F1 Score (Test)</td>
+              <td id="f1-score">-</td>
+            </tr>
+            <tr>
+              <td>Precision (Test)</td>
+              <td id="precision">-</td>
+            </tr>
+            <tr>
+              <td>Recall (Test)</td>
+              <td id="recall">-</td>
+            </tr>
+            <tr>
+              <td>ROC AUC</td>
+              <td id="roc-auc">-</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- INTERPRETACIÓN -->
       <section>
         <h2>Interpretación del Modelo</h2>
         <table class="table centered" id="interpretation-table">
@@ -64,13 +107,28 @@
         </table>
       </section>
 
-      <!-- BOTÓN REGRESAR -->
+      <!-- ROC -->
+      <section>
+        <h2>Curva ROC</h2>
+        <table class="table centered">
+          <tbody>
+            <tr>
+              <td>
+                <img id="roc-img" alt="Curva ROC" />
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- BOTÓN -->
       <div class="actions">
         <button class="btn-back" onclick="window.location.href='index.html'">
           ⬅ Regresar al inicio
         </button>
       </div>
     </div>
+
     <script src="js/config.js"></script>
     <script src="js/evaluacion.js"></script>
   </body>

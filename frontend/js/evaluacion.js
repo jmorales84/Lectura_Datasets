@@ -24,42 +24,36 @@ document.addEventListener("DOMContentLoaded", async () => {
             throw new Error("No se pudo iniciar la evaluación");
         }
 
-        const startData = await startResponse.json();
-        const taskId = startData.task_id;
+        const { task_id } = await startResponse.json();
 
         /* ===============================
-           2. POLLING DE ESTADO
+           2. POLLING
         =============================== */
-        let finished = false;
-
-        while (!finished) {
+        while (true) {
             const estadoRes = await fetch(
-                `${API_BASE_URL}/apis/estado_modelo/${taskId}/`
+                `${API_BASE_URL}/apis/estado_modelo/${task_id}/`
             );
 
             if (!estadoRes.ok) {
-                throw new Error("Error consultando el estado del modelo");
+                throw new Error("Error consultando estado");
             }
 
             const estado = await estadoRes.json();
 
-            // Actualizar UI de progreso
-            const progress = estado.progress ?? 0;
-            progressBar.style.width = `${progress}%`;
+            progressBar.style.width = `${estado.progress || 0}%`;
             progressText.textContent = estado.message || "Procesando...";
 
             if (estado.status === "done") {
-                finished = true;
                 progressBar.style.width = "100%";
                 progressText.textContent = "Evaluación completada";
                 renderResultados(estado.result);
+                break;
             }
 
             if (estado.status === "error") {
                 throw new Error(estado.error);
             }
 
-            // Esperar antes del siguiente poll
             await new Promise(r => setTimeout(r, 1500));
         }
 
@@ -74,44 +68,66 @@ document.addEventListener("DOMContentLoaded", async () => {
    RENDER DE RESULTADOS
 =============================== */
 function renderResultados(data) {
-    const accVal = data.metrics.accuracy_validation;
-    const accTest = data.metrics.accuracy_test;
-    const diff = data.metrics.accuracy_difference;
+    const m = data.metrics;
 
-    document.getElementById("acc-val").textContent = accVal.toFixed(4);
-    document.getElementById("acc-test").textContent = accTest.toFixed(4);
-    document.getElementById("acc-diff").textContent = diff.toFixed(4);
+    // ===============================
+    // Accuracy
+    // ===============================
+    document.getElementById("acc-val").textContent =
+        m.accuracy_validation.toFixed(4);
 
+    document.getElementById("acc-test").textContent =
+        m.accuracy_test.toFixed(4);
+
+    document.getElementById("acc-diff").textContent =
+        m.accuracy_difference.toFixed(4);
+
+    // ===============================
+    // F1 / Precision / Recall / ROC
+    // ===============================
+    document.getElementById("f1-score").textContent =
+        m.f1_score.toFixed(4);
+
+    document.getElementById("precision").textContent =
+        m.precision.toFixed(4);
+
+    document.getElementById("recall").textContent =
+        m.recall.toFixed(4);
+
+    document.getElementById("roc-auc").textContent =
+        m.roc_auc.toFixed(4);
+
+    // ===============================
+    // Interpretación
+    // ===============================
+    const diff = m.accuracy_difference;
     const tbody = document.querySelector("#interpretation-table tbody");
 
     let cls, text, state;
-
     if (diff < 0.02) {
-        cls = "ok";
-        text = "Excelente generalización";
-        state = "Óptimo";
+        cls = "ok"; text = "Excelente generalización"; state = "Óptimo";
     } else if (diff < 0.05) {
-        cls = "ok";
-        text = "Generalización normal";
-        state = "Aceptable";
+        cls = "ok"; text = "Generalización normal"; state = "Aceptable";
     } else if (diff < 0.10) {
-        cls = "warn";
-        text = "Posible overfitting";
-        state = "Riesgo";
+        cls = "warn"; text = "Posible overfitting"; state = "Riesgo";
     } else {
-        cls = "bad";
-        text = "Overfitting severo";
-        state = "Crítico";
+        cls = "bad"; text = "Overfitting severo"; state = "Crítico";
     }
 
     tbody.innerHTML = `
-        <tr class="${cls}">
-            <td>${diff.toFixed(4)}</td>
-            <td>${text}</td>
-            <td>${state}</td>
-        </tr>
+      <tr class="${cls}">
+        <td>${diff.toFixed(4)}</td>
+        <td>${text}</td>
+        <td>${state}</td>
+      </tr>
     `;
 
+    // ===============================
+    // Imágenes
+    // ===============================
     document.getElementById("confusion-img").src =
-        `${API_BASE_URL}${data.metrics.confusion_matrix_image}`;
+        `${API_BASE_URL}${m.confusion_matrix_image}`;
+
+    document.getElementById("roc-img").src =
+        `${API_BASE_URL}${m.roc_curve_image}`;
 }
